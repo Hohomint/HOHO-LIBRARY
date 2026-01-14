@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>꿈나무 초등학교 도서관 - 월별 행사</title>
+    <style>
+        /* 기본 스타일 설정 */
+        body {
+            font-family: 'Nanum Gothic', sans-serif;
+            background-color: #f9fbfd;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+
+        /* 월 선택 버튼 영역 */
+        .month-container {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 10px;
+            margin-bottom: 30px;
+            max-width: 800px;
+        }
+
+        .month-btn {
+            padding: 15px 25px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #fff;
+            border: 2px solid #3498db;
+            border-radius: 8px;
+            color: #3498db;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .month-btn:hover {
+            background-color: #ebf5fb;
+        }
+
+        .month-btn.active {
+            background-color: #3498db;
+            color: white;
+        }
+
+        /* 행사 상세 정보 카드 */
+        .event-card {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            padding: 30px;
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+            min-height: 200px;
+        }
+
+        .event-month {
+            font-size: 24px;
+            color: #e67e22;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .event-title {
+            font-size: 20px;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .event-desc {
+            line-height: 1.6;
+            color: #666;
+        }
+
+        /* 애니메이션 효과 */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>📚 월별 도서관 행사 안내</h1>
+    <p>궁금한 달을 클릭하면 도서관 소식을 볼 수 있어요!</p>
+
+    <div class="month-container" id="monthButtons">
+        </div>
+
+    <div class="event-card" id="eventDisplay">
+        <div class="event-month">환영합니다!</div>
+        <div class="event-title">달을 선택해 주세요.</div>
+        <div class="event-desc">우리 학교 도서관의 1년 행사를 확인할 수 있습니다.</div>
+    </div>
+
+    <script>
+        // 12개월 행사 데이터 객체
+        const libraryEvents = {
+            1: { title: "겨울방학 독서 캠프", desc: "추운 겨울, 도서관에서 따뜻한 책 읽기! 독서 퀴즈와 북아트 활동을 진행합니다." },
+            2: { title: "중고 도서 나눔 장터", desc: "내가 다 읽은 책을 친구들과 교환하며 소중한 책의 가치를 나눠요." },
+            3: { title: "도서관과 친해지는 달", desc: "신입생 여러분 환영합니다! 대출증 만드는 법과 이용 교육이 있어요." },
+            4: { title: "세계 책의 날 기념 행사", desc: "4월 23일, 책을 대출하는 친구들에게 예쁜 꽃씨나 사탕을 선물합니다." },
+            5: { title: "가족과 함께하는 독서", desc: "가정의 달을 맞아 부모님과 함께 책을 읽고 소감을 남기는 달입니다." },
+            6: { title: "우리 학교 다독왕 발표", desc: "1학기 동안 책을 가장 많이 읽은 친구들을 칭찬하고 시상합니다." },
+            7: { title: "여름방학 북캉스", desc: "시원한 도서관에서 무더위를 이겨내는 테마 도서 전시회가 열립니다." },
+            8: { title: "도서관 보물찾기", desc: "청구기호를 활용해 서가 속에 숨겨진 보물 카드를 찾아보세요!" },
+            9: { title: "독서의 달 행사", desc: "가을은 독서의 계절! 작가님을 초청하여 직접 이야기를 듣는 시간을 가져요." },
+            10: { title: "연체 지우개 주간", desc: "책을 늦게 반납해서 대출이 정지된 친구들의 연체를 풀어주는 주간입니다." },
+            11: { title: "도서관 소원 나무", desc: "내년에 도서관에 새로 들어왔으면 하는 책 리스트를 적어 나무를 꾸며요." },
+            12: { title: "크리스마스 영화 상영", desc: "한 해를 마무리하며 책 원작 영화를 도서관 시청각실에서 상영합니다." }
+        };
+
+        const monthButtonsContainer = document.getElementById('monthButtons');
+        const eventDisplay = document.getElementById('eventDisplay');
+
+        // 1. 월별 버튼 동적 생성
+        for (let i = 1; i <= 12; i++) {
+            const btn = document.createElement('button');
+            btn.innerText = i + '월';
+            btn.classList.add('month-btn');
+            btn.onclick = () => showEvent(i, btn);
+            monthButtonsContainer.appendChild(btn);
+        }
+
+        // 2. 행사 내용 보여주기 함수
+        function showEvent(month, selectedBtn) {
+            // 모든 버튼에서 active 클래스 제거
+            document.querySelectorAll('.month-btn').forEach(btn => btn.classList.remove('active'));
+            // 클릭한 버튼에 active 클래스 추가
+            selectedBtn.classList.add('active');
+
+            // 데이터 가져오기
+            const event = libraryEvents[month];
+
+            // 화면 업데이트 (애니메이션을 위해 클래스 재적용)
+            eventDisplay.classList.remove('fade-in');
+            void eventDisplay.offsetWidth; // 리플로우 강제 발생
+            eventDisplay.classList.add('fade-in');
+
+            eventDisplay.innerHTML = `
+                <div class="event-month">${month}월 도서관 소식</div>
+                <div class="event-title">✨ ${event.title}</div>
+                <div class="event-desc">${event.desc}</div>
+            `;
+        }
+    </script>
+</body>
+</html>

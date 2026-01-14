@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>호호도서관 - 책 찾기 대장</title>
+    <style>
+        :root {
+            --primary-color: #4a90e2;
+            --accent-color: #ffcc00;
+            --bg-color: #f0f7ff;
+            --white: #ffffff;
+        }
+
+        body {
+            font-family: 'Nanum Gothic', sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        /* 헤더 디자인 */
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+            border-bottom-left-radius: 30px;
+            border-bottom-right-radius: 30px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        header h1 { margin: 0; font-size: 2.2em; }
+        header p { margin: 10px 0 0; opacity: 0.9; }
+
+        .container {
+            max-width: 900px;
+            margin: -20px auto 40px;
+            padding: 0 20px;
+        }
+
+        /* 검색 영역 */
+        .search-card {
+            background: var(--white);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 10px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #e1e8ed;
+            border-radius: 12px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus { border-color: var(--primary-color); }
+
+        .search-btn {
+            padding: 0 25px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .search-btn:hover { background: #357abd; }
+
+        /* KDC 분류 안내 영역 */
+        .kdc-section {
+            background: var(--white);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        }
+
+        .kdc-intro {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .kdc-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 15px;
+        }
+
+        .kdc-item {
+            padding: 20px 10px;
+            border-radius: 15px;
+            text-align: center;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+        }
+
+        .kdc-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .kdc-num { font-size: 1.4em; display: block; margin-bottom: 5px; }
+        .kdc-name { font-size: 0.9em; display: block; }
+
+        /* 검색 결과 리스트 */
+        .result-item {
+            background: #f8f9fa;
+            margin-top: 10px;
+            padding: 15px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 5px solid var(--primary-color);
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .call-number {
+            background: #eee;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9em;
+        }
+
+        h2 { color: var(--primary-color); display: flex; align-items: center; gap: 10px; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>😊 호호도서관</h1>
+    <p>찾고 싶은 책을 입력하거나 색깔별 번호를 확인해 보세요!</p>
+</header>
+
+<div class="container">
+    
+    <div class="search-card">
+        <h2>🔍 어떤 책을 찾고 있나요?</h2>
+        <div class="search-box">
+            <input type="text" id="bookInput" placeholder="책 제목이나 지은이 이름을 써주세요" onkeyup="if(window.event.keyCode==13){searchBooks()}">
+            <button class="search-btn" onclick="searchBooks()">책 찾기</button>
+        </div>
+        <div id="searchResultArea" style="margin-top: 20px;"></div>
+    </div>
+
+    <div class="kdc-section">
+        <div class="kdc-intro">
+            <h2>🏷️ 숫자로 보는 책 지도 (KDC)</h2>
+            <p>책 등 표지에 붙은 번호를 보면 어떤 종류의 책인지 알 수 있어요!</p>
+        </div>
+        
+        <div class="kdc-grid">
+            <div class="kdc-item" style="background:#636e72;"><span class="kdc-num">000</span><span class="kdc-name">모두의 지식<br>(백과사전, 컴퓨터)</span></div>
+            <div class="kdc-item" style="background:#e84393;"><span class="kdc-num">100</span><span class="kdc-name">생각하는 힘<br>(철학, 마음)</span></div>
+            <div class="kdc-item" style="background:#a29bfe;"><span class="kdc-num">200</span><span class="kdc-name">세상의 믿음<br>(종교, 신화)</span></div>
+            <div class="kdc-item" style="background:#0984e3;"><span class="kdc-num">300</span><span class="kdc-name">함께 사는 세상<br>(사회, 경제)</span></div>
+            <div class="kdc-item" style="background:#00b894;"><span class="kdc-num">400</span><span class="kdc-name">자연의 신비<br>(수학, 과학)</span></div>
+            <div class="kdc-item" style="background:#f1c40f;"><span class="kdc-num">500</span><span class="kdc-name">만들고 고치기<br>(요리, 기술)</span></div>
+            <div class="kdc-item" style="background:#1abc9c;"><span class="kdc-num">600</span><span class="kdc-name">아름다운 표현<br>(그림, 음악, 운동)</span></div>
+            <div class="kdc-item" style="background:#e67e22;"><span class="kdc-num">700</span><span class="kdc-name">말과 글<br>(우리말, 외국어)</span></div>
+            <div class="kdc-item" style="background:#d35400;"><span class="kdc-num">800</span><span class="kdc-name">이야기 보따리<br>(소설, 동화, 시)</span></div>
+            <div class="kdc-item" style="background:#795548;"><span class="kdc-num">900</span><span class="kdc-name">옛날 이야기<br>(역사, 위인전)</span></div>
+        </div>
+        
+    </div>
+
+</div>
+
+<script>
+    // 호호도서관 소장 도서 목록 (예시 데이터)
+    const inventory = [
+        {title: "만복이네 떡집", author: "리혜", code: "813.8-리55만"},
+        {title: "개미", author: "베르나르 베르베르", code: "495.7-베36개"},
+        {title: "그리스 로마 신화", author: "토마스 불핀치", code: "211-불83그"},
+        {title: "수학 유령의 집", author: "김수학", code: "410-김22수"},
+        {title: "어린이 요리 백과", author: "맛나다", code: "594-맛12요"},
+        {title: "해리포터와 마법사의 돌", author: "J.K. 롤링", code: "843-롤72해"},
+        {title: "세종대왕 이야기", author: "역사사랑", code: "990-역15세"},
+        {title: "어린이 맞춤법", author: "바른글", code: "711-바44어"}
+    ];
+
+    function searchBooks() {
+        const query = document.getElementById('bookInput').value.trim().toLowerCase();
+        const resultArea = document.getElementById('searchResultArea');
+        
+        if (!query) {
+            resultArea.innerHTML = "<p style='color: #e74c3c;'>찾고 싶은 책의 이름을 입력해 주세요!</p>";
+            return;
+        }
+
+        const filtered = inventory.filter(book => 
+            book.title.toLowerCase().includes(query) || 
+            book.author.toLowerCase().includes(query)
+        );
+
+        if (filtered.length > 0) {
+            resultArea.innerHTML = `<h3>총 ${filtered.length}권을 찾았어요!</h3>` + 
+                filtered.map(book => `
+                    <div class="result-item">
+                        <div>
+                            <strong>📘 ${book.title}</strong><br>
+                            <small>${book.author} 저</small>
+                        </div>
+                        <div class="call-number">${book.code}</div>
+                    </div>
+                `).join('');
+        } else {
+            resultArea.innerHTML = `
+                <div style="text-align: center; padding: 20px;">
+                    <span style="font-size: 40px;">😥</span>
+                    <p>호호도서관에 아직 그 책이 없나 봐요.<br>제목을 다시 한번 확인해 볼까요?</p>
+                </div>`;
+        }
+    }
+</script>
+
+</body>
+</html>
